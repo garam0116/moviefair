@@ -186,7 +186,7 @@
         .ticket-title {
             font-size: 2.5rem;
             font-weight: bold;
-            color: #ffffff;
+            color: white;
             margin-bottom: 10px;
         }
 
@@ -198,9 +198,6 @@
         }
 
         .characters-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
             position: relative;
             z-index: 2;
             padding: 40px;
@@ -213,6 +210,14 @@
             backdrop-filter: blur(10px);
             border: 2px solid #555;
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            margin-bottom: 25px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .character-info {
+            flex: 1;
         }
 
         .character-name {
@@ -223,24 +228,10 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
-        .character-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 3px solid #666;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-        }
-
         .character-review {
             line-height: 1.6;
             color: #e0e0e0;
             font-size: 14px;
-        }
-
-        .perforated-line {
-            display: none;
         }
 
         .download-section {
@@ -272,8 +263,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎬 영화 감상평 티켓 생성기</h1>
-            <p>당신만의 특별한 영화 티켓을 만들어보세요!</p>
+            <h1>🎬 영화 감상평 이미지 생성기</h1>
+            <p>클래퍼보드 스타일의 감상평 이미지를 만들어보세요!</p>
         </div>
 
         <div class="form-section">
@@ -302,17 +293,16 @@
 
             <div style="text-align: center; margin: 20px 0;">
                 <button class="btn btn-add" onclick="addCharacter()">+ 캐릭터 추가</button>
-                <button class="btn btn-generate" onclick="generateTicket()">🎫 티켓 생성하기</button>
+                <button class="btn btn-generate" onclick="generateTicket()">🎨 이미지 생성하기</button>
             </div>
         </div>
 
         <div id="ticketResult" class="hidden">
             <div class="ticket-container">
                 <div class="ticket" id="generatedTicket">
-                    <div class="perforated-line"></div>
                     <div class="ticket-header">
                         <div class="ticket-title" id="ticketMovieTitle"></div>
-                        <div class="ticket-subtitle">MOVIE REVIEW TICKET</div>
+                        <div class="ticket-subtitle">MOVIE REVIEW</div>
                     </div>
                     <div class="characters-grid" id="ticketCharacters">
                     </div>
@@ -410,9 +400,11 @@
                 const characterCard = document.createElement('div');
                 characterCard.className = 'character-card';
                 characterCard.innerHTML = `
-                    <div class="character-name">${character.name}</div>
                     ${character.imageUrl ? `<img src="${character.imageUrl}" alt="${character.name}" class="character-image">` : ''}
-                    <div class="character-review">${character.review}</div>
+                    <div class="character-info">
+                        <div class="character-name">${character.name}</div>
+                        <div class="character-review">${character.review}</div>
+                    </div>
                 `;
                 ticketCharacters.appendChild(characterCard);
             });
@@ -439,7 +431,7 @@
             });
             
             const link = document.createElement('a');
-            link.download = `영화_감상평_티켓_${document.getElementById('ticketMovieTitle').textContent}.png`;
+            link.download = `영화_감상평_${document.getElementById('ticketMovieTitle').textContent}.png`;
             link.href = canvas.toDataURL();
             link.click();
         }

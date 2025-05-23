@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영화 감상평 티켓 생성기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .input-group input[type="text"],
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input[type="text"]:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group input[type="file"] {
+            padding: 8px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .character-section {
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #fafafa;
+        }
+
+        .character-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-add {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            margin-right: 10px;
+        }
+
+        .btn-remove {
+            background: linear-gradient(45deg, #dc3545, #fd7e14);
+            font-size: 14px;
+            padding: 8px 15px;
+        }
+
+        .btn-generate {
+            width: 100%;
+            font-size: 18px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .ticket-container {
+            perspective: 1000px;
+            margin-top: 30px;
+        }
+
+        .ticket {
+            background: linear-gradient(145deg, #1c1c1c, #2d2d2d);
+            border-radius: 15px;
+            padding: 0;
+            color: white;
+            position: relative;
+            transform-style: preserve-3d;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            overflow: hidden;
+            border: 3px solid #333;
+        }
+
+        .ticket::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: repeating-linear-gradient(
+                45deg,
+                #fff 0px,
+                #fff 10px,
+                #000 10px,
+                #000 20px
+            );
+        }
+
+        .ticket::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: repeating-linear-gradient(
+                45deg,
+                #fff 0px,
+                #fff 10px,
+                #000 10px,
+                #000 20px
+            );
+        }
+
+        .ticket-header {
+            text-align: center;
+            padding: 40px 40px 30px 40px;
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+            border-bottom: 3px solid #444;
+        }
+
+        .ticket-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .ticket-subtitle {
+            font-size: 1.2rem;
+            color: #ccc;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            position: relative;
+            z-index: 2;
+            padding: 40px;
+        }
+
+        .character-card {
+            background: rgba(50,50,50,0.8);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 2px solid #555;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .character-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ffdd59;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .character-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 3px solid #666;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+
+        .image-container {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 3px solid #666;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #444;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .character-review {
+            line-height: 1.6;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .perforated-line {
+            display: none;
+        }
+
+        .download-section {
+            text-align: center;
+            margin-top: 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .ticket-title {
+                font-size: 2rem;
+            }
+            
+            .characters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .ticket {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 영화 감상평 티켓 생성기</h1>
+            <p>당신만의 특별한 영화 티켓을 만들어보세요!</p>
+        </div>
+
+        <div class="form-section">
+            <div class="input-group">
+                <label for="movieTitle">영화 제목</label>
+                <input type="text" id="movieTitle" placeholder="영화 제목을 입력하세요">
+            </div>
+
+            <div id="charactersContainer">
+                <div class="character-section">
+                    <h3>캐릭터 1</h3>
+                    <div class="input-group">
+                        <label>캐릭터 이름</label>
+                        <input type="text" class="character-name-input" placeholder="캐릭터 이름을 입력하세요">
+                    </div>
+                    <div class="input-group">
+                        <label>캐릭터 사진</label>
+                        <input type="file" class="character-image-input" accept="image/*">
+                    </div>
+                    <div class="input-group">
+                        <label>감상평</label>
+                        <textarea class="character-review-input" rows="4" placeholder="이 캐릭터에 대한 감상평을 작성하세요"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <button class="btn btn-add" onclick="addCharacter()">+ 캐릭터 추가</button>
+                <button class="btn btn-generate" onclick="generateTicket()">🎫 티켓 생성하기</button>
+            </div>
+        </div>
+
+        <div id="ticketResult" class="hidden">
+            <div class="ticket-container">
+                <div class="ticket" id="generatedTicket">
+                    <div class="perforated-line"></div>
+                    <div class="ticket-header">
+                        <div class="ticket-title" id="ticketMovieTitle"></div>
+                        <div class="ticket-subtitle">MOVIE REVIEW TICKET</div>
+                    </div>
+                    <div class="characters-grid" id="ticketCharacters">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="download-section">
+                <button class="btn" onclick="downloadTicket()">💾 이미지로 저장하기</button>
+                <button class="btn" onclick="resetForm()" style="margin-left: 10px;">🔄 새로 만들기</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        let characterCount = 1;
+
+        function addCharacter() {
+            characterCount++;
+            const container = document.getElementById('charactersContainer');
+            const newCharacterSection = document.createElement('div');
+            newCharacterSection.className = 'character-section';
+            newCharacterSection.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3>캐릭터 ${characterCount}</h3>
+                    <button class="btn btn-remove" onclick="removeCharacter(this)">삭제</button>
+                </div>
+                <div class="input-group">
+                    <label>캐릭터 이름</label>
+                    <input type="text" class="character-name-input" placeholder="캐릭터 이름을 입력하세요">
+                </div>
+                <div class="input-group">
+                    <label>캐릭터 사진</label>
+                    <input type="file" class="character-image-input" accept="image/*">
+                </div>
+                <div class="input-group">
+                    <label>감상평</label>
+                    <textarea class="character-review-input" rows="4" placeholder="이 캐릭터에 대한 감상평을 작성하세요"></textarea>
+                </div>
+            `;
+            container.appendChild(newCharacterSection);
+        }
+
+        function removeCharacter(button) {
+            const characterSection = button.closest('.character-section');
+            characterSection.remove();
+            updateCharacterNumbers();
+        }
+
+        function updateCharacterNumbers() {
+            const characterSections = document.querySelectorAll('.character-section');
+            characterSections.forEach((section, index) => {
+                const title = section.querySelector('h3');
+                if (title && !title.textContent.includes('삭제')) {
+                    title.textContent = `캐릭터 ${index + 1}`;
+                }
+            });
+            characterCount = characterSections.length;
+        }
+
+        async function generateTicket() {
+            const movieTitle = document.getElementById('movieTitle').value;
+            if (!movieTitle.trim()) {
+                alert('영화 제목을 입력해주세요.');
+                return;
+            }
+
+            const characterSections = document.querySelectorAll('.character-section');
+            const characters = [];
+
+            for (let section of characterSections) {
+                const name = section.querySelector('.character-name-input').value;
+                const review = section.querySelector('.character-review-input').value;
+                const imageInput = section.querySelector('.character-image-input');
+                
+                if (!name.trim() || !review.trim()) {
+                    alert('모든 캐릭터의 이름과 감상평을 입력해주세요.');
+                    return;
+                }
+
+                let imageUrl = null;
+                if (imageInput.files && imageInput.files[0]) {
+                    imageUrl = await fileToDataURL(imageInput.files[0]);
+                }
+
+                characters.push({ name, review, imageUrl });
+            }
+
+            // 티켓 생성
+            document.getElementById('ticketMovieTitle').textContent = movieTitle;
+            const ticketCharacters = document.getElementById('ticketCharacters');
+            ticketCharacters.innerHTML = '';
+
+            characters.forEach(character => {
+                const characterCard = document.createElement('div');
+                characterCard.className = 'character-card';
+                characterCard.innerHTML = `
+                    <div class="character-name">${character.name}</div>
+                    ${character.imageUrl ? `<img src="${character.imageUrl}" alt="${character.name}" class="character-image">` : ''}
+                    <div class="character-review">${character.review}</div>
+                `;
+                ticketCharacters.appendChild(characterCard);
+            });
+
+            document.getElementById('ticketResult').classList.remove('hidden');
+            document.getElementById('ticketResult').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function fileToDataURL(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function downloadTicket() {
+            const ticket = document.getElementById('generatedTicket');
+            
+            // 이미지들이 모두 로드될 때까지 기다림
+            const images = ticket.querySelectorAll('img');
+            await Promise.all(Array.from(images).map(img => {
+                return new Promise(resolve => {
+                    if (img.complete) {
+                        resolve();
+                    } else {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    }
+                });
+            }));
+            
+            const canvas = await html2canvas(ticket, {
+                backgroundColor: null,
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                foreignObjectRendering: true,
+                logging: false,
+                width: ticket.offsetWidth,
+                height: ticket.offsetHeight
+            });
+            
+            const link = document.createElement('a');
+            link.download = `영화_감상평_티켓_${document.getElementById('ticketMovieTitle').textContent}.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        }
+
+        function resetForm() {
+            document.getElementById('movieTitle').value = '';
+            document.getElementById('charactersContainer').innerHTML = `
+                <div class="character-section">
+                    <h3>캐릭터 1</h3>
+                    <div class="input-group">
+                        <label>캐릭터 이름</label>
+                        <input type="text" class="character-name-input" placeholder="캐릭터 이름을 입력하세요">
+                    </div>
+                    <div class="input-group">
+                        <label>캐릭터 사진</label>
+                        <input type="file" class="character-image-input" accept="image/*">
+                    </div>
+                    <div class="input-group">
+                        <label>감상평</label>
+                        <textarea class="character-review-input" rows="4" placeholder="이 캐릭터에 대한 감상평을 작성하세요"></textarea>
+                    </div>
+                </div>
+            `;
+            characterCount = 1;
+            document.getElementById('ticketResult').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

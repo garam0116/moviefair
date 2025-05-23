@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>영화 감상평 티켓 생성기</title>
+    <title>영화 감상평 생성기</title>
     <style>
         * {
             margin: 0;
@@ -201,19 +201,26 @@
             position: relative;
             z-index: 2;
             padding: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
         }
 
         .character-card {
-            background: rgba(50,50,50,0.8);
-            border-radius: 12px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
-            border: 2px solid #555;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            margin-bottom: 25px;
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
+                background: rgba(50,50,50,0.8);
+                border-radius: 12px;
+                padding: 20px;
+                backdrop-filter: blur(10px);
+                border: 2px solid #555;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+                margin-bottom: 25px;
+                display: flex;
+                gap: 20px;
+                align-items: flex-start;
+                flex: 1;
+                min-width: 300px;
+                max-width: 45%;
         }
 
         .character-info {
@@ -364,54 +371,102 @@
         }
 
         async function generateTicket() {
-            const movieTitle = document.getElementById('movieTitle').value;
-            if (!movieTitle.trim()) {
-                alert('영화 제목을 입력해주세요.');
-                return;
-            }
+    const movieTitle = document.getElementById('movieTitle').value;
+    if (!movieTitle.trim()) {
+        alert('영화 제목을 입력해주세요.');
+        return;
+    }
 
-            const characterSections = document.querySelectorAll('.character-section');
-            const characters = [];
+    const characterSections = document.querySelectorAll('.character-section');
+    const characters = [];
 
-            for (let section of characterSections) {
-                const name = section.querySelector('.character-name-input').value;
-                const review = section.querySelector('.character-review-input').value;
-                const imageInput = section.querySelector('.character-image-input');
-                
-                if (!name.trim() || !review.trim()) {
-                    alert('모든 캐릭터의 이름과 감상평을 입력해주세요.');
-                    return;
-                }
-
-                let imageUrl = null;
-                if (imageInput.files && imageInput.files[0]) {
-                    imageUrl = await fileToDataURL(imageInput.files[0]);
-                }
-
-                characters.push({ name, review, imageUrl });
-            }
-
-            // 티켓 생성
-            document.getElementById('ticketMovieTitle').textContent = movieTitle;
-            const ticketCharacters = document.getElementById('ticketCharacters');
-            ticketCharacters.innerHTML = '';
-
-            characters.forEach(character => {
-                const characterCard = document.createElement('div');
-                characterCard.className = 'character-card';
-                characterCard.innerHTML = `
-                    ${character.imageUrl ? `<img src="${character.imageUrl}" alt="${character.name}" class="character-image">` : ''}
-                    <div class="character-info">
-                        <div class="character-name">${character.name}</div>
-                        <div class="character-review">${character.review}</div>
-                    </div>
-                `;
-                ticketCharacters.appendChild(characterCard);
-            });
-
-            document.getElementById('ticketResult').classList.remove('hidden');
-            document.getElementById('ticketResult').scrollIntoView({ behavior: 'smooth' });
+    for (let section of characterSections) {
+        const name = section.querySelector('.character-name-input').value;
+        const review = section.querySelector('.character-review-input').value;
+        const imageInput = section.querySelector('.character-image-input');
+        
+        if (!name.trim() || !review.trim()) {
+            alert('모든 캐릭터의 이름과 감상평을 입력해주세요.');
+            return;
         }
+
+        let imageUrl = null;
+        if (imageInput.files && imageInput.files[0]) {
+            imageUrl = await fileToDataURL(imageInput.files[0]);
+        }
+
+        characters.push({ name, review, imageUrl });
+    }
+
+    // 티켓 생성
+    document.getElementById('ticketMovieTitle').textContent = movieTitle;
+    const ticketCharacters = document.getElementById('ticketCharacters');
+    ticketCharacters.innerHTML = '';
+
+    characters.forEach(character => {
+        const characterCard = document.createElement('div');
+        characterCard.className = 'character-card';
+        characterCard.innerHTML = `
+            ${character.imageUrl ? `<img src="${character.imageUrl}" alt="${character.name}" style="max-width: 100px; max-height: 100px; border-radius: 8px;">` : ''}
+            <div class="character-info">
+                <div class="character-name">${character.name}</div>
+                <div class="character-review">${character.review}</div>
+            </div>
+        `;
+        ticketCharacters.appendChild(characterCard);
+    });
+
+    document.getElementById('ticketResult').classList.remove('hidden');
+    document.getElementById('ticketResult').scrollIntoView({ behavior: 'smooth' });
+    
+    // 티켓에 클래퍼보드 스타일 추가
+    const ticketElement = document.getElementById('generatedTicket');
+    
+    // 기존 스트라이프 제거 (중복 방지)
+    const existingStripes = ticketElement.querySelectorAll('div[style*="repeating-linear-gradient"]');
+    existingStripes.forEach(stripe => stripe.remove());
+
+    // 상단 클래퍼보드 스타일
+    const topStripe = document.createElement('div');
+    topStripe.style.cssText = `
+        height: 8px;
+        width: 100%;
+        background: repeating-linear-gradient(
+            45deg,
+            #fff 0px,
+            #fff 10px,
+            #000 10px,
+            #000 20px
+        );
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+    `;
+
+    // 하단 클래퍼보드 스타일
+    const bottomStripe = document.createElement('div');
+    bottomStripe.style.cssText = `
+        height: 8px;
+        width: 100%;
+        background: repeating-linear-gradient(
+            45deg,
+            #fff 0px,
+            #fff 10px,
+            #000 10px,
+            #000 20px
+        );
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+    `;
+
+    ticketElement.appendChild(topStripe);
+    ticketElement.appendChild(bottomStripe);
+}
 
         function fileToDataURL(file) {
             return new Promise((resolve) => {
@@ -422,19 +477,103 @@
         }
 
         async function downloadTicket() {
-            const ticket = document.getElementById('generatedTicket');
-            const canvas = await html2canvas(ticket, {
-                backgroundColor: null,
-                scale: 2,
-                useCORS: true,
-                allowTaint: true
-            });
-            
-            const link = document.createElement('a');
-            link.download = `영화_감상평_${document.getElementById('ticketMovieTitle').textContent}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-        }
+    const ticket = document.getElementById('generatedTicket');
+    
+    // 기존 스트라이프 모두 제거
+    const existingStripes = ticket.querySelectorAll('.ticket-stripe');
+    existingStripes.forEach(stripe => stripe.remove());
+    
+    // 상단 슬레이트 바를 개별 div들로 생성
+    const topContainer = document.createElement('div');
+    topContainer.className = 'ticket-stripe';
+    topContainer.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 8px;
+        z-index: 100;
+        display: flex;
+    `;
+    
+    // 하얀색/검은색 패턴을 반복하여 생성
+    for (let i = 0; i < 60; i++) {
+        const stripe = document.createElement('div');
+        stripe.style.cssText = `
+            width: 10px;
+            height: 8px;
+            background-color: ${i % 2 === 0 ? '#ffffff' : '#000000'};
+            flex-shrink: 0;
+        `;
+        topContainer.appendChild(stripe);
+    }
+    
+    // 하단 슬레이트 바를 개별 div들로 생성
+    const bottomContainer = document.createElement('div');
+    bottomContainer.className = 'ticket-stripe';
+    bottomContainer.style.cssText = `
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 8px;
+        z-index: 100;
+        display: flex;
+    `;
+    
+    for (let i = 0; i < 60; i++) {
+        const stripe = document.createElement('div');
+        stripe.style.cssText = `
+            width: 10px;
+            height: 8px;
+            background-color: ${i % 2 === 0 ? '#ffffff' : '#000000'};
+            flex-shrink: 0;
+        `;
+        bottomContainer.appendChild(stripe);
+    }
+    
+    ticket.appendChild(topContainer);
+    ticket.appendChild(bottomContainer);
+    
+    // 캡처 전 여백 추가
+    ticket.style.paddingTop = '8px';
+    ticket.style.paddingBottom = '8px';
+    
+    try {
+        // DOM 렌더링 시간 확보
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        const canvas = await html2canvas(ticket, {
+            backgroundColor: "#000000",
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            logging: false
+        });
+        
+        // 원래 스타일로 복원
+        ticket.style.paddingTop = '0';
+        ticket.style.paddingBottom = '0';
+        
+        // 이미지 다운로드
+        const link = document.createElement('a');
+        link.download = `영화_감상평_${document.getElementById('ticketMovieTitle').textContent}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        // 슬레이트 바 제거
+        ticket.querySelectorAll('.ticket-stripe').forEach(stripe => stripe.remove());
+        
+    } catch (error) {
+        console.error("이미지 생성 중 오류 발생:", error);
+        alert("이미지 생성 중 오류가 발생했습니다.");
+        
+        // 원래 스타일로 복원
+        ticket.style.paddingTop = '0';
+        ticket.style.paddingBottom = '0';
+        ticket.querySelectorAll('.ticket-stripe').forEach(stripe => stripe.remove());
+    }
+}
 
         function resetForm() {
             document.getElementById('movieTitle').value = '';

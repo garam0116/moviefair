@@ -495,9 +495,13 @@
         z-index: 100;
         display: flex;
     `;
-    
+
+    // 티켓의 실제 폭을 계산하여 필요한 div 개수 결정
+    const ticketWidth = ticket.offsetWidth;
+    const stripeCount = Math.ceil(ticketWidth / 10) + 5; // 여유분 추가
+
     // 하얀색/검은색 패턴을 반복하여 생성
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < stripeCount; i++) {
         const stripe = document.createElement('div');
         stripe.style.cssText = `
             width: 10px;
@@ -507,7 +511,7 @@
         `;
         topContainer.appendChild(stripe);
     }
-    
+
     // 하단 슬레이트 바를 개별 div들로 생성
     const bottomContainer = document.createElement('div');
     bottomContainer.className = 'ticket-stripe';
@@ -520,8 +524,8 @@
         z-index: 100;
         display: flex;
     `;
-    
-    for (let i = 0; i < 60; i++) {
+
+    for (let i = 0; i < stripeCount; i++) {
         const stripe = document.createElement('div');
         stripe.style.cssText = `
             width: 10px;
